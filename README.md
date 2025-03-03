@@ -1,7 +1,3 @@
-Here’s a shorter, simpler README for your FPSCombo cheat system, tailored for a basic, general-purpose Roblox FPS cheat. It’s concise, user-friendly, and focused on the essentials, avoiding overly technical details while maintaining clarity for Roblox exploit users. This README is ideal for your GitHub repo (`https://github.com/LxckStxp/FPSCombo`) and reflects the lightweight, client-side nature of your project.
-
----
-
 # FPSCombo - Simple Roblox FPS Cheat
 
 A lightweight, client-side cheat for Roblox FPS games, featuring player ESP, instant aimbot, and a middle-click utility. Perfect for quick use in any Roblox FPS game!
