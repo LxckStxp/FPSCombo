@@ -1,4 +1,4 @@
-return function(Config, ESP, Aimbot)
+return function(Config, ESP, Aimbot, MiddleClick)
     local CensuraDev = loadstring(game:HttpGet("https://raw.githubusercontent.com/LxckStxp/Censura/main/CensuraDev.lua"))()
     local UI = CensuraDev.new("FPS Combo")
     
@@ -27,6 +27,11 @@ return function(Config, ESP, Aimbot)
     UI:CreateToggle("Team Check", Config.TeamCheck, function(state)
         Config.TeamCheck = state
         ESP.Update() -- Refresh ESP to apply team colors
+    end)
+    
+    -- Middle Click Utility Toggle
+    UI:CreateToggle("Middle Click Utility", MiddleClick.Enabled, function(state)
+        MiddleClick.Enabled = state
     end)
     
     return UI
