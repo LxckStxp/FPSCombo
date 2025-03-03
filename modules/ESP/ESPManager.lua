@@ -16,7 +16,7 @@ return function(Config, Utilities, ESPObject, ESPConfig)
             if player ~= Player and not ESPManager.Players[player] then
                 local isAlly = teamCheck and Utilities.isSameTeam(Player, player)
                 if not isAlly then
-                    ESPManager.Players[player] = ESPObject.Create(player, false) -- Always enemy (red) if not ally
+                    ESPManager.Players[player] = ESPObject.Create(player, false) -- Enemy (red)
                 end
             end
         end
