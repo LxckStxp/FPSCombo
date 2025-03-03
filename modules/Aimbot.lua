@@ -14,6 +14,14 @@ local Aimbot = {
     }
 }
 
+-- Wait for Camera to be valid
+local function waitForCamera()
+    while not Camera do
+        Camera = workspace.CurrentCamera
+        task.wait(0.1) -- Wait briefly before retrying
+    end
+end
+
 -- Utility function to get players (excluding local player and teammates if team check is on)
 local function getPlayers()
     local players = {}
@@ -32,6 +40,7 @@ end
 
 -- Find closest enemy player to crosshair (excluding teammates if team check is on)
 local function findClosestPlayer()
+    waitForCamera() -- Ensure Camera is valid
     local mouse = UserInputService:GetMouseLocation()
     local ray = Camera:ScreenPointToRay(mouse.X, mouse.Y)
     local raycastParams = RaycastParams.new()
@@ -74,9 +83,19 @@ local function findClosestPlayer()
     return closestPlayer
 end
 
--- Aim at target’s head instantly
+-- Aim at target’s head instantly (with Camera check)
 local function aimAtTarget()
-    if not Aimbot.Target or not Aimbot.Target.Character or not Aimbot.Target.Character:FindFirstChild("Head") then return end
+    waitForCamera() -- Ensure Camera is valid
+    if not Camera or not Aimbot.Target or not Aimbot.Target.Character or not Aimbot.Target.Character:FindFirstChild("Head") then
+        print("Invalid target or Camera, stopping aimbot...")
+        if Aimbot.RenderConnection then
+            Aimbot.RenderConnection:Disconnect()
+            Aimbot.RenderConnection = nil
+            Aimbot.Aiming = false
+            Aimbot.Target = nil
+        end
+        return
+    end
     
     local head = Aimbot.Target.Character.Head
     local targetPos = head.Position -- Direct head targeting, no offset
@@ -91,6 +110,7 @@ end
 -- Handle input for aimbot
 function Aimbot.Initialize()
     print("Aimbot initializing...")
+    waitForCamera() -- Ensure Camera is ready before initializing
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed or not Aimbot.Enabled then return end
         if input.UserInputType == Aimbot.Settings.AimKey then
