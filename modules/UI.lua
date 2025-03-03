@@ -23,10 +23,11 @@ return function(Config, ESP, Aimbot, MiddleClick)
         Aimbot.Enabled = state
     end)
     
-    -- Team Check Toggle
+    -- Team Check Toggle (affects both ESP and Aimbot)
     UI:CreateToggle("Team Check", Config.TeamCheck, function(state)
         Config.TeamCheck = state
-        ESP.Update() -- Refresh ESP to apply team colors
+        ESP.Update() -- Refresh ESP to apply team colors and hide allies
+        -- No need to refresh Aimbot; it uses Config.TeamCheck dynamically
     end)
     
     -- Middle Click Utility Toggle
