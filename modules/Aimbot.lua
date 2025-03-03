@@ -14,18 +14,23 @@ local Aimbot = {
     }
 }
 
--- Utility function to get players (excluding local player)
+-- Utility function to get players (excluding local player and teammates if team check is on)
 local function getPlayers()
     local players = {}
+    local config = getgenv().Config or {}
+    local teamCheck = config.TeamCheck or false
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= Player then
-            table.insert(players, player)
+            local isAlly = teamCheck and Utilities.isSameTeam(Player, player)
+            if not isAlly then
+                table.insert(players, player)
+            end
         end
     end
     return players
 end
 
--- Find closest player to crosshair (with team check)
+-- Find closest enemy player to crosshair (excluding teammates if team check is on)
 local function findClosestPlayer()
     local mouse = UserInputService:GetMouseLocation()
     local ray = Camera:ScreenPointToRay(mouse.X, mouse.Y)
@@ -34,13 +39,15 @@ local function findClosestPlayer()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local closestPlayer, closestDistance = nil, math.huge
-    local raycastResult = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+    local config = getgenv().Config or {}
+    local teamCheck = config.TeamCheck or false
     
+    local raycastResult = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
     if raycastResult and raycastResult.Instance then
         local character = raycastResult.Instance:FindFirstAncestorOfClass("Model")
         local targetPlayer = Players:GetPlayerFromCharacter(character)
         if targetPlayer and targetPlayer ~= Player then
-            local isAlly = getgenv().Config.TeamCheck and Players.LocalPlayer and Utilities.isSameTeam(Players.LocalPlayer, targetPlayer)
+            local isAlly = teamCheck and Utilities.isSameTeam(Player, targetPlayer)
             if not isAlly then
                 closestPlayer = targetPlayer
                 closestDistance = (Camera.CFrame.Position - raycastResult.Position).Magnitude
@@ -56,8 +63,7 @@ local function findClosestPlayer()
             local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - mouse).Magnitude
-                local isAlly = getgenv().Config.TeamCheck and Utilities.isSameTeam(Player, player)
-                if distance < closestDistance and not isAlly then
+                if distance < closestDistance then
                     closestPlayer = player
                     closestDistance = distance
                 end
@@ -79,17 +85,23 @@ local function aimAtTarget()
     
     -- Instant aim (no smoothing, overpowered)
     Camera.CFrame = newCFrame
+    print("Aiming at:", Aimbot.Target.Name) -- Debug
 end
 
 -- Handle input for aimbot
 function Aimbot.Initialize()
+    print("Aimbot initializing...")
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed or not Aimbot.Enabled then return end
         if input.UserInputType == Aimbot.Settings.AimKey then
+            print("RightClick pressed, checking for target...")
             Aimbot.Aiming = true
             Aimbot.Target = findClosestPlayer()
             if Aimbot.Target and Aimbot.Target.Character then
+                print("Targeting:", Aimbot.Target.Name)
                 Aimbot.RenderConnection = RunService.RenderStepped:Connect(aimAtTarget)
+            else
+                print("No valid target found")
             end
         end
     end)
@@ -97,11 +109,13 @@ function Aimbot.Initialize()
     UserInputService.InputEnded:Connect(function(input, gameProcessed)
         if gameProcessed or not Aimbot.Enabled then return end
         if input.UserInputType == Aimbot.Settings.AimKey then
+            print("RightClick released, stopping aimbot...")
             Aimbot.Aiming = false
             Aimbot.Target = nil
             if Aimbot.RenderConnection then
                 Aimbot.RenderConnection:Disconnect()
                 Aimbot.RenderConnection = nil
+                print("Aimbot stopped")
             end
         end
     end)
