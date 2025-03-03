@@ -25,10 +25,14 @@ if not ESP then error("ESP.lua failed to load") end
 local Aimbot = loadModule(baseUrl .. "Aimbot.lua")
 if not Aimbot then error("Aimbot.lua failed to load") end
 
-local UI = loadModule(baseUrl .. "UI.lua")()(Config, ESP, Aimbot)
+local MiddleClick = loadModule(baseUrl .. "MiddleClick.lua")
+if not MiddleClick then error("MiddleClick.lua failed to load") end
+
+local UI = loadModule(baseUrl .. "UI.lua")()(Config, ESP, Aimbot, MiddleClick)
 if not UI then error("UI.lua failed to load") end
 
 ESP.Initialize()
 Aimbot.Initialize()
+MiddleClick.Initialize()
 
 print("FPS Combo Loaded Successfully!")
