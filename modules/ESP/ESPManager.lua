@@ -11,16 +11,25 @@ return function(Config, Utilities, ESPObject, ESPConfig)
     function ESPManager.Update()
         if not Config.Enabled then return end
         
+        local teamCheck = Config.TeamCheck or false
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= Player and not ESPManager.Players[player] then
-                local isAlly = Config.TeamCheck and Utilities.isSameTeam(Player, player) or false
-                ESPManager.Players[player] = ESPObject.Create(player, isAlly)
+                local isAlly = teamCheck and Utilities.isSameTeam(Player, player)
+                if not isAlly then
+                    ESPManager.Players[player] = ESPObject.Create(player, false) -- Always enemy (red) if not ally
+                end
             end
         end
         
         for player, esp in pairs(ESPManager.Players) do
             if player.Parent and Players:GetPlayerFromCharacter(player.Character) then
-                esp:Update()
+                local isAlly = teamCheck and Utilities.isSameTeam(Player, player)
+                if not isAlly then
+                    esp:Update()
+                else
+                    esp:Destroy()
+                    ESPManager.Players[player] = nil
+                end
             else
                 esp:Destroy()
                 ESPManager.Players[player] = nil
